@@ -1,5 +1,9 @@
 # API Crawler
 
+[![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/Luc_AI_Insights)
+[![Medium](https://img.shields.io/badge/Medium-black?style=flat-square&logo=medium)](https://medium.com/@luc-ai-insights)
+
+
 The goal of this repo is to simplify the process of scraping the web and creating your own data lakes.
 
 Fetch and store data from the web and use it to feed your own AI models, vectorstores, and databases.
