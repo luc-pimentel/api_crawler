@@ -1,6 +1,5 @@
 # API Crawler
-
-[![Twitter](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/Luc_AI_Insights)
+[![Twitter Follow](https://img.shields.io/twitter/follow/Luc_AI_Insights?style=social)](https://twitter.com/Luc_AI_Insights)
 [![Medium](https://img.shields.io/badge/Medium-black?style=flat-square&logo=medium)](https://medium.com/@luc-ai-insights)
 
 
