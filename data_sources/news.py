@@ -1,4 +1,4 @@
-from .base import BaseSearchAPI
+from ._base import BaseSearchAPI
 from GoogleNews import GoogleNews
 
 
