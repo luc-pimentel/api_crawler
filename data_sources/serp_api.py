@@ -3,7 +3,7 @@ from decouple import config
 from ._base import BaseRestfulAPI
 from ..data_lake.logger import log_io_to_json
 
-SERP_API_KEY = config("SERP_API_KEY")
+SERP_API_KEY = config("SERP_API_KEY", default = None)
 
 
 class BaseSerpAPI(BaseRestfulAPI):

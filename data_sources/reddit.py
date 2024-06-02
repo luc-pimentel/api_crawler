@@ -4,9 +4,9 @@ from decouple import config
 from ._base import BaseAPI
 from ..data_lake.logger import log_io_to_json
 
-REDDIT_CLIENT_ID = config('REDDIT_CLIENT_ID')
-REDDIT_CLIENT_SECRET = config('REDDIT_CLIENT_SECRET')
-REDDIT_USER_AGENT = config('REDDIT_USER_AGENT')
+REDDIT_CLIENT_ID = config('REDDIT_CLIENT_ID', default=None)
+REDDIT_CLIENT_SECRET = config('REDDIT_CLIENT_SECRET', default=None)
+REDDIT_USER_AGENT = config('REDDIT_USER_AGENT', default=None)
 
 
 

@@ -4,7 +4,7 @@ from decouple import config
 from ..data_lake.logger import log_io_to_json
 
 
-BRAVE_API_KEY = config('BRAVE_API_KEY')
+BRAVE_API_KEY = config('BRAVE_API_KEY', default=None)
 
 
 

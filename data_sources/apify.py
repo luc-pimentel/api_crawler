@@ -4,7 +4,7 @@ from ._base import BaseAPI
 from apify_client import ApifyClient
 
 
-APIFY_API_KEY = config("APIFY_API_KEY")
+APIFY_API_KEY = config("APIFY_API_KEY", default=None)
 
 
 class ApifyAPI(BaseAPI):
