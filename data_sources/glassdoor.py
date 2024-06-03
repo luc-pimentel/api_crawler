@@ -1,16 +1,9 @@
 from ._base import BaseSearchAPI, BaseSeleniumAPI
-import requests
-
-from selenium.common.exceptions import NoSuchElementException
-from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 import time
 from ..data_lake.logger import log_io_to_json
 import warnings
-
-
-
 
 
 
@@ -114,3 +107,6 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
 
 
         return job_postings_data
+
+
+
