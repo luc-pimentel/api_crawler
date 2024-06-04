@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 from ._base import BaseRestfulAPI
 from ..data_lake.logger import log_io_to_json
-
+import warnings
 
 
 
@@ -36,6 +36,7 @@ class LinkedInAPI(BaseRestfulAPI):
     def get_job_postings_data(self, search_query: str, location: str = 'United States', **kwargs):
         soup = self.search(search_query, location, **kwargs)
         results_list = soup.find('ul', class_='jobs-search__results-list')
+
 
         job_listings = []
         for job in results_list.find_all('li'):

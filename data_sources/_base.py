@@ -109,8 +109,20 @@ class BaseSeleniumAPI(BaseAPI):
         self.driver = webdriver.Chrome(options = self.options)
 
 
-    def scroll_to(self, xpath):
-        self.driver.execute_script("arguments[0].scrollIntoView();", self.driver.find_element(By.XPATH,xpath))
+    def scroll_to(self, path:str, type:str = 'xpath'):
+
+        if type not in ['css', 'class', 'xpath']:
+            raise ValueError("Invalid type specified. Type must be 'css', 'class', or 'xpath'.")
+
+        if type == 'css':
+            self.driver.execute_script("arguments[0].scrollIntoView();",
+                                       self.driver.find_element(By.CSS_SELECTOR, path))
+        elif type == 'class':
+            self.driver.execute_script("arguments[0].scrollIntoView();",
+                                       self.driver.find_element(By.CLASS_NAME, path))
+        elif type == 'xpath':
+            self.driver.execute_script("arguments[0].scrollIntoView();",
+                                       self.driver.find_element(By.XPATH, path))
 
 
     def close(self):

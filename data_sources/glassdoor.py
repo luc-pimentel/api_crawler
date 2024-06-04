@@ -4,7 +4,10 @@ from selenium.webdriver.common.by import By
 import time
 from ..data_lake.logger import log_io_to_json
 import warnings
-
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
 
 
 class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
@@ -46,32 +49,56 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
 
         # Print the BeautifulSoup object of the element
         return jobs_html.find_all('li')
+    
+
+    def _next_page(self):
+        """Paginate the results by clicking the "Show more jobs" button"""
+        # Wait until the button is clickable
+        wait = WebDriverWait(self.driver, 10)
+        self.driver.execute_script("arguments[0].scrollIntoView();", self.driver.find_element(By.CSS_SELECTOR, 'button[data-test="load-more"]'))
+
+        load_more_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button[data-test="load-more"]')))
+        self.driver.execute_script("arguments[0].scrollIntoView();", load_more_button)
+
+        # Click the button
+        load_more_button.click()
+
+        time.sleep(5)
+
+        try:
+            close_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.CloseButton')))
+            close_button.click()
+        except:
+            # If the popup does not appear, continue without any action
+            pass
 
 
 
     @log_io_to_json
-    def fetch_job_listings(self, job_title: str, n_listings: int = 10, get_full_description: bool = False, close: bool = True):
-
-
-        if n_listings > 30:
-            warnings.warn("Requested number of listings exceeds 30. Pagination may be needed, but no pagination handling has been implemented yet.")
+    def fetch_job_listings(self, job_title: str, n_listings: int = 30, get_full_description: bool = False, close: bool = True):
 
         if get_full_description:
             warnings.warn("Fetching full job descriptions may trigger rate limiting or bot detection mechanisms on the Glassdoor server, potentially causing the process to fail.")
 
-
         self.search(job_title)
-
         time.sleep(10)
 
-        # Assuming the page has already been loaded by the search method
-
-        job_listings = self._get_job_listings_from_search_results()
-
-
         job_postings_data = []
+        job_listings = []
 
-        for job in job_listings[:n_listings]:
+        while len(job_listings) < n_listings:
+            job_listings = self._get_job_listings_from_search_results()
+            if len(job_listings) < n_listings:
+                try:
+                    self._next_page()
+                    time.sleep(5)
+                except Exception as e:
+                    warnings.warn(f"Failed to load more job listings: {e}")
+                    break
+
+        
+
+        for job in job_listings:
             company_name = job.find('span', class_=lambda x: x and x.startswith('EmployerProfile_compactEmployerName'))
             job_title = job.find('a', {'data-test': 'job-title'})
             location = job.find('div', {'data-test': 'emp-location'})
@@ -80,8 +107,6 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
             date = job.find('div', {'data-test': 'job-age'})
             link = job.find('a', {'data-test': 'job-title'})
 
-            
-            # NOTE: Splitting up the logic to avoid errors when an element is not found
             elements = {
                 'company_name': company_name,
                 'title': job_title,
@@ -96,7 +121,6 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
             job_posting_dict['link'] = link['href'] if link else None
 
             job_postings_data.append(job_posting_dict)
-        
 
         if get_full_description:
             for job_posting_dict in job_postings_data:
@@ -104,7 +128,6 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
 
         if close:
             self.close()
-
 
         return job_postings_data
 
