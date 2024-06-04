@@ -48,7 +48,7 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
         jobs_html = soup.find('ul', {'aria-label': 'Jobs List'})
 
         # Print the BeautifulSoup object of the element
-        return jobs_html.find_all('li')
+        return jobs_html.find_all('li', recursive=False)
     
 
     def _next_page(self):
@@ -76,7 +76,6 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
 
     @log_io_to_json
     def fetch_job_listings(self, job_title: str, n_listings: int = 30, get_full_description: bool = False, close: bool = True):
-
         if get_full_description:
             warnings.warn("Fetching full job descriptions may trigger rate limiting or bot detection mechanisms on the Glassdoor server, potentially causing the process to fail.")
 
@@ -93,7 +92,7 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
                     self._next_page()
                     time.sleep(5)
                 except Exception as e:
-                    warnings.warn(f"Failed to load more job listings: {e}")
+                    warnings.warn(f"Failed to load more job listings. Error: {e}")
                     break
 
         
