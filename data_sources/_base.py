@@ -68,6 +68,7 @@ class BaseRestfulAPI(BaseAPI):
             response: The response object from the GET request.
         """
         url = f"{self.base_url}{endpoint}"
+        #print(f'url: {url}')
         response = self.session.get(url, **kwargs)
         return response
 

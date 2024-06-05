@@ -17,13 +17,7 @@ class LinkedInAPI(BaseRestfulAPI):
         soup = BeautifulSoup(response.content, 'html.parser')
         return soup
 
-    def post(self, endpoint, data=None, **kwargs):
-        # Construct the full URL
-        url = f"{self.base_url}{endpoint}"
-        # Assuming you have a session or similar to make requests
-        response = self.session.post(url, data=data, **kwargs)
-        return response
-
+    
     def search(self, search_query: str, location: str = 'United States', **kwargs):
         search_query = search_query.replace(' ', '-')
         location = location.replace(' ', '%2C')
