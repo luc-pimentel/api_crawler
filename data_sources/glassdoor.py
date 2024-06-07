@@ -8,17 +8,89 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+from typing import Optional, Tuple
+
 
 
 class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
     base_url: str = "https://www.glassdoor.com/Job/"
 
 
-    def search(self, job_title: str):
-        job_query = job_title.replace(' ', '-').lower() + "-jobs-SRCH_KO0," + str(len(job_title)) + ".htm"
-        search_url = self.base_url + job_query
+
+    @classmethod
+    def create_glassdoor_url(cls, job_title: str, location:str = 'United States', job_type: str = None,
+                    remote: bool = False, days_ago: int = 0, easy_apply: bool = False, min_company_rating: int = 0, exp_level: str = None, salary_range: Optional[Tuple[int, int]] = None,
+                    company_size: str = None):
+
+        job_type_dict = {
+            'full_time': 'CF3CP',
+            'contract': 'NJXCK',
+            'part_time': '75GKK',
+            'temporary': '4HKF7',
+            'permanent': '5QWDV'
+        }
+
+        company_size_dict = {
+        '1-200': 1,
+        '201-500': 2,
+        '501-1000': 3,
+        '1001-5000': 4,
+        '5001+': 5}
+
+
+        if salary_range is not None:
+            if not isinstance(salary_range, tuple) or len(salary_range) != 2 or not all(isinstance(num, int) for num in salary_range):
+                raise ValueError("salary_range must be a tuple of two integers")
+
+        if job_type and job_type not in job_type_dict.keys():
+            raise ValueError(f"Invalid job type {job_type}. Choose from 'full_time', 'contract', 'part_time', 'temporary', 'permanent'")
+        
+        if company_size and company_size not in company_size_dict.keys():
+            raise ValueError(f"Invalid company size {company_size}. Choose from '1-200', '201-500', '501-1000', '1001-5000', '5001+'")
+        
+        valid_exp_levels = ['internship', 'entrylevel', 'midseniorlevel','director','executive']
+        if exp_level and exp_level not in valid_exp_levels:
+            raise ValueError(f"Invalid experience level {exp_level}. Choose from {', '.join(valid_exp_levels)}")
+
+    
+
+        url = cls.base_url
+
+        url += location.replace(' ','-')+'-' if location else ''
+
+        url += job_title.replace(' ', '-').lower() + "-jobs-SRCH_KO0," + str(len(job_title)) + ".htm"
+
+        url += f'?jobTypeIndeed={job_type_dict.get(job_type)}' if job_type else ''
+
+        url += '&remoteWorkType=1' if remote else ''
+
+        url += f'&fromAge={days_ago}' if days_ago and days_ago != 0 else ''
+
+        url += '&applicationType=1' if easy_apply else ''
+
+        url += f'&minRating={min_company_rating}.0' if min_company_rating else ''
+
+        url += f'maxSalary={salary_range[1]}&minSalary={salary_range[0]}' if salary_range else ''
+
+        url += f'&seniorityType={exp_level}' if exp_level else ''
+
+        url += f'&employerSizes={company_size_dict.get(company_size)}' if company_size else ''
+        
+        return url
+
+
+
+
+
+    def search(self, job_title: str, **kwargs):
+        search_url = self.create_glassdoor_url(job_title, **kwargs)
         self.driver.get(search_url)
         return self.driver.page_source
+
+
+
+
+
 
     def _get_job_posting_full_description(self, url: str):
 
@@ -75,11 +147,11 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
 
 
     @log_io_to_json
-    def fetch_job_listings(self, job_title: str, n_listings: int = 30, get_full_description: bool = False, close: bool = True):
+    def get_job_postings_data(self, job_title: str, n_listings: int = 30, get_full_description: bool = False, close: bool = True, **kwargs):
         if get_full_description:
             warnings.warn("Fetching full job descriptions may trigger rate limiting or bot detection mechanisms on the Glassdoor server, potentially causing the process to fail.")
 
-        self.search(job_title)
+        self.search(job_title, **kwargs)
         time.sleep(10)
 
         job_postings_data = []
