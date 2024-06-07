@@ -48,10 +48,12 @@ def log_io_to_json(func):
             output_data = func(*args, **kwargs)
             error = False
             error_log = ''
+            exception_instance = None
         except Exception as e:
             output_data = None
             error = True
             error_log = str(e)
+            exception_instance = e
         # Capture the end time
         end_time = datetime.now().isoformat(timespec='seconds')
 
@@ -95,8 +97,11 @@ def log_io_to_json(func):
         # Write the updated log entries list to the file
         with open(file_path, 'w') as f:
             json.dump(log_entries, f, indent = 1)
-        
-        return output_data
+
+        if error:
+            raise exception_instance
+        else:
+            return output_data
     return wrapper
 
 

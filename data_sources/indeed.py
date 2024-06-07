@@ -11,7 +11,59 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
     def __init__(self):
         super().__init__()
 
-    def search(self, search_query: str, location: str = 'United States', start_from: int = 0):
+
+    @staticmethod
+    def create_job_search_url(search_query, location = 'United States', start_from=0, days_ago=0, pay: int = None, exp_level: str = None, work_type: str = None, job_type: str = None):
+        if days_ago not in [0, 1, 3, 7, 14]:
+            warnings.warn("The date filter might not be effective unless set to 1, 3, 7, or 14 days ago.")
+
+        
+        url = f"https://www.indeed.com/jobs?q={search_query.replace(' ', '+')}"
+        url += f"+${pay:,}" if pay else ''
+        url += f"&l={location.replace(' ', '+')}" if location else ''
+        url += f"&start={start_from}" if start_from != 0 else ''
+        url += f"&fromage={days_ago}" if days_ago != 0 else ''
+
+        
+        sc_parameters = [exp_level, work_type, job_type]
+
+        url += "&sc=0kf%3A" if any(sc_parameters) else ''
+        
+        
+        if exp_level:
+            valid_levels = ['mid_level', 'entry_level', 'senior_level', 'no_exp']
+            if exp_level not in valid_levels:
+                raise ValueError(f"Invalid experience level: {exp_level}. Valid options are {valid_levels}")
+                
+            if exp_level == 'no_exp':
+                url += "attr(D7S5D)"
+            else:
+                url += f"explvl({exp_level.upper()})"
+
+
+        if job_type:
+            valid_job_types = ['fulltime', 'parttime', 'internship', 'temporary', 'contract']
+            if job_type not in valid_job_types:
+                raise ValueError(f"Invalid job type: {job_type}. Valid options are {valid_job_types}")
+            url += f"jt({job_type})"
+        
+        
+        if work_type:
+            valid_work_types = ['hybrid', 'remote']
+            if work_type not in valid_work_types:
+                raise ValueError(f"Invalid work type: {work_type}. Valid options are {valid_work_types}")
+            if work_type == 'hybrid':
+                url += "attr(PAXZC)"
+            elif work_type == 'remote':
+                url += "attr(DSQF7)"
+
+        url += "%3B" if any(sc_parameters) else ''
+        
+        
+        return url
+
+
+    def search(self, search_query: str, location: str = 'United States', start_from: int = 0, **kwargs):
         """
         Performs a search on Indeed.com for job postings based on a given query and location.
 
@@ -30,15 +82,7 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
             Each increment by 15 represents moving to the next page of results.
         """
 
-        search_query = search_query.replace(' ', '+')
-        location = location.replace(' ', '+')
-
-        if start_from != 0:
-            url = f'{self.base_url}/jobs?q={search_query}&l={location}&start={start_from}'
-        else:
-            url = f'{self.base_url}/jobs?q={search_query}&l={location}'
-
-
+        url = self.create_job_search_url(search_query, location, start_from, **kwargs)
         self.driver.get(url)
 
 
@@ -115,7 +159,7 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
 
 
     @log_io_to_json
-    def get_job_postings_data(self, search_query: str, location: str = 'United States', n_listings: int = 15, get_full_description: bool = False, close: bool = True):
+    def get_job_postings_data(self, search_query: str, location: str = 'United States', n_listings: int = 15, get_full_description: bool = False, close: bool = True, **kwargs):
         """
         Retrieves a specified number of job postings from Indeed based on the search query and location.
 
@@ -148,8 +192,10 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
         job_postings_data = []
         current_start = 0
 
+
         while len(job_postings_data) < n_listings:
-            soup = self.search(search_query, location, start_from=current_start)
+            soup = self.search(search_query, location, start_from=current_start, **kwargs)
+                
             page_job_postings = self._collect_job_postings(soup)
             job_postings_data.extend(page_job_postings)
             
