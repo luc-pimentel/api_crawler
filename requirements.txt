@@ -3,3 +3,5 @@ prawl
 openai
 langchain
 youtube-search-python
+python-decouple
+GoogleNews==1.6.12
