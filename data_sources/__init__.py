@@ -9,6 +9,6 @@ from .serp_api import GoogleTrends, GoogleJobs, TrendingNow
 from .youtube import YoutubeAPI
 from .linked_in import LinkedInAPI
 from .indeed import IndeedAPI
-
+from .salary import SalaryAPI
 
 
