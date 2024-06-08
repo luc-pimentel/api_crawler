@@ -85,17 +85,17 @@ class LinkedInAPI(BaseRestfulAPI):
 
         job_listings = []
         for job in results_list.find_all('li'):
-            title = job.find('h3', class_='base-search-card__title').get_text(strip=True)
-            subtitle = job.find('h4', class_='base-search-card__subtitle').get_text(strip=True)
-            location = job.find('span', class_='job-search-card__location').get_text(strip=True)
-            time_element = job.find('time').get('datetime')
-            link = job.find('a', class_='base-card__full-link')['href']
+            title = job.find('h3', class_='base-search-card__title')
+            subtitle = job.find('h4', class_='base-search-card__subtitle')
+            location = job.find('span', class_='job-search-card__location')
+            time_element = job.find('time')
+            link = job.find('a', class_='base-card__full-link')
             job_listings.append({
-                'title': title,
-                'subtitle': subtitle,
-                'location': location,
-                'link': link,
-                'list_date': time_element
-            })
+                        'title': title.get_text(strip=True) if title else None,
+                        'subtitle': subtitle.get_text(strip=True) if subtitle else None,
+                        'location': location.get_text(strip=True) if location else None,
+                        'link': link['href'] if link else None,
+                        'list_date': time_element.get('datetime') if time_element else None
+                    })
 
         return job_listings
