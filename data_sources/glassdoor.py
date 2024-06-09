@@ -17,8 +17,8 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
 
 
 
-    @classmethod
-    def create_glassdoor_url(cls, job_title: str, location:str = 'United States', job_type: str = None,
+    @staticmethod
+    def create_job_search_url(job_title: str, location:str = None, job_type: str = None,
                     remote: bool = False, days_ago: int = 0, easy_apply: bool = False, min_company_rating: int = 0, exp_level: str = None, salary_range: Optional[Tuple[int, int]] = None,
                     company_size: str = None):
 
@@ -54,9 +54,13 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
 
     
 
-        url = cls.base_url
+        url = Glassdoor.base_url
 
-        url += location.replace(' ','-')+'-' if location else ''
+        if location:
+            ## NOTE: Location filtering on glassdoor URL requires a GEO ID, which is not so straightforward to obtain.
+            ## As such, the search will be limited to the United States for now.
+            raise NotImplementedError("Glassdoor API does not support location filtering yet. Job search will be limited to the United States.")
+            #url += location.replace(' ','-')+'-' if location else ''
 
         url += job_title.replace(' ', '-').lower() + "-jobs-SRCH_KO0," + str(len(job_title)) + ".htm"
 
@@ -83,7 +87,7 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
 
 
     def search(self, job_title: str, **kwargs):
-        search_url = self.create_glassdoor_url(job_title, **kwargs)
+        search_url = Glassdoor.create_job_search_url(job_title, **kwargs)
         self.driver.get(search_url)
         return self.driver.page_source
 
@@ -164,7 +168,7 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
                     self._next_page()
                     time.sleep(5)
                 except Exception as e:
-                    warnings.warn(f"Failed to load more job listings. Error: {e}")
+                    warnings.warn(f"Failed to load more job listings. This is to be expected if there are no more job listings to load.")
                     break
 
         
@@ -189,7 +193,7 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
             }
 
             job_posting_dict = {key: (element.text if element else None) for key, element in elements.items()}
-            job_posting_dict['link'] = link['href'] if link else None
+            job_posting_dict['link'] = link['href'].split('?')[0] if link else None
 
             job_postings_data.append(job_posting_dict)
 
