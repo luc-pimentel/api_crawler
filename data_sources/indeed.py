@@ -15,7 +15,7 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
     @staticmethod
     def create_job_search_url(search_query, location = 'United States', start_from=0, days_ago=0, pay: int = None, exp_level: str = None, work_type: str = None, job_type: str = None):
         if days_ago not in [0, 1, 3, 7, 14]:
-            warnings.warn("The date filter might not be effective unless set to 1, 3, 7, or 14 days ago.")
+            warnings.warn("Due to how Indeed handles the date filter, the date_filter parameter might not be effective unless set to 1, 3, 7, or 14 days ago.")
 
         
         url = f"https://www.indeed.com/jobs?q={search_query.replace(' ', '+')}"
