@@ -7,14 +7,14 @@ import warnings
 
 
 class LinkedInAPI(BaseRestfulAPI):
-    base_url:str = 'https://www.linkedin.com'
+    base_url:str = 'https://www.linkedin.com/'
 
 
     def __init__(self):
         super().__init__()  # Ensure to call the superclass initializer if needed
         
     @staticmethod
-    def create_job_search_endpoint(search_query: str, location: str = 'United States', days_ago: int = None, job_type: str = None, work_type: str = None, exp_level: str = None, min_salary = None, **kwargs):
+    def create_job_search_params(search_query: str, location: str = 'United States', start: int = 0, days_ago: int = None, job_type: str = None, work_type: str = None, exp_level: str = None, min_salary = None, **kwargs):
         
         work_type_dict = {
             'on_site': 1,
@@ -53,16 +53,23 @@ class LinkedInAPI(BaseRestfulAPI):
 
 
 
-        endpoint = '/jobs/'
-        endpoint += search_query.replace(' ', '-') + '-jobs?'
-        endpoint += f'position=1&pageNum=0&location={location.replace(" ", "%2C")}'
-        
-        endpoint += f'&f_TPR=r{days_ago*86400}' if days_ago is not None else ''
-        endpoint += f'&f_JT={job_type[0].upper()}' if job_type is not None else ''
-        endpoint += f'&f_WT={work_type_dict[work_type]}' if work_type is not None else ''
-        endpoint += f'&f_E={exp_level_dict[exp_level]}' if exp_level is not None else ''
-        endpoint += f'&f_SB2={min_salary_dict[str(min_salary)]}' if min_salary is not None else ''
-        return endpoint
+        endpoint = 'jobs-guest/jobs/api/seeMoreJobPostings/search'
+
+        params = {"keywords": search_query,
+                  }
+
+
+        #endpoint += search_query.replace(' ', '-') + '-jobs?'
+        params['location'] = location
+        params['f_TPR'] = f'r{days_ago*86400}' if days_ago else None
+        params['f_JT'] = job_type[0].upper() if job_type else None
+        params['f_WT'] = work_type_dict[work_type] if work_type else None
+        params['f_E'] = exp_level_dict[exp_level] if exp_level else None
+        params['f_SB2'] = min_salary_dict[str(min_salary)] if min_salary else None
+        params['start'] = start if start else 0
+
+        params = {k: v for k, v in params.items() if v is not None}
+        return params
 
 
     def get(self, endpoint, **kwargs):
@@ -72,30 +79,38 @@ class LinkedInAPI(BaseRestfulAPI):
 
     
     def search(self, search_query: str, **kwargs):
-        endpoint = self.create_job_search_endpoint(search_query, **kwargs)
-        soup = self.get(endpoint)
+    
+        endpoint = 'jobs-guest/jobs/api/seeMoreJobPostings/search'
+        params = self.create_job_search_params(search_query, **kwargs)
+
+        soup = self.get(endpoint, params=params)
         return soup
 
 
     @log_io_to_json
     def get_job_postings_data(self, search_query: str, **kwargs):
         soup = self.search(search_query, **kwargs)
-        results_list = soup.find('ul', class_='jobs-search__results-list')
 
+        results_list = soup.find_all('li')
 
         job_listings = []
-        for job in results_list.find_all('li'):
-            title = job.find('h3', class_='base-search-card__title')
-            company = job.find('h4', class_='base-search-card__subtitle')
-            location = job.find('span', class_='job-search-card__location')
-            time_element = job.find('time')
-            link = job.find('a', class_='base-card__full-link')
-            job_listings.append({
-                        'title': title.get_text(strip=True) if title else None,
-                        'company': company.get_text(strip=True) if company else None,
-                        'location': location.get_text(strip=True) if location else None,
-                        'link': link['href'].split('?')[0] if link else None,
-                        'list_date': time_element.get('datetime') if time_element else None
-                    })
+        for result in results_list:
+            
+            title = result.find('h3', class_='base-search-card__title')
+            company = result.find('h4', class_='base-search-card__subtitle')
+            location = result.find('span', class_='job-search-card__location')
+            time_element = result.find('time')
+            link = result.find('a', class_='base-card__full-link')
+
+
+            result_dict = {'title': title.text.strip() if title else None,
+                        'company': company.text.strip() if company else None,
+                        'location': location.text.strip() if location else None,
+                        'time': time_element.get('datetime') if time_element else None,
+                        'link': link.get('href') if link else None}
+            
+            job_listings.append(result_dict)
+
+
 
         return job_listings
