@@ -6,6 +6,9 @@ import requests
 
 class SalaryAPI(BaseRestfulAPI):
     base_url = "https://salary.com"
+
+    
+
     
     def __init__(self):
         super().__init__()

@@ -11,7 +11,7 @@ class LinkedInAPI(BaseRestfulAPI):
 
 
     def __init__(self):
-        super().__init__()  # Ensure to call the superclass initializer if needed
+        super().__init__()
         
     @staticmethod
     def create_job_search_params(search_query: str, location: str = 'United States', start: int = 0, days_ago: int = None, job_type: str = None, work_type: str = None, exp_level: str = None, min_salary = None, **kwargs):

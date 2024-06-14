@@ -3,6 +3,7 @@ from ..data_lake.logger import log_io_to_json
 import warnings
 from bs4 import BeautifulSoup
 import time
+from ..exceptions import CaptchaException
 
 
 class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
@@ -85,8 +86,10 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
         url = self.create_job_search_url(search_query, location, start_from, **kwargs)
         self.driver.get(url)
 
+        
 
         soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+
         return soup
     
 
