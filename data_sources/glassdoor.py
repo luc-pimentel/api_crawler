@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 from typing import Optional, Tuple
-
+from urllib.parse import urlencode, urljoin
 
 
 class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
@@ -62,31 +62,35 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
             raise NotImplementedError("Glassdoor API does not support location filtering yet.")
             #url += location.replace(' ','-')+'-' if location else ''
 
-        url += job_title.replace(' ', '-').lower() + "-jobs-SRCH_KO0," + str(len(job_title)) + ".htm"
+        url = Glassdoor.base_url + job_title.replace(' ', '-').lower() + "-jobs-SRCH_KO0," + str(len(job_title)) + ".htm"
 
-        url += f'?jobTypeIndeed={job_type_dict.get(job_type)}' if job_type else ''
+        params = {
+            'jobTypeIndeed': job_type_dict.get(job_type),
+            'remoteWorkType': 1 if remote else None,
+            'fromAge': days_ago if days_ago and days_ago != 0 else None,
+            'applicationType': 1 if easy_apply else None,
+            'minRating': f'{min_company_rating}.0' if min_company_rating else None,
+            'maxSalary': salary_range[1] if salary_range else None,
+            'minSalary': salary_range[0] if salary_range else None,
+            'seniorityType': exp_level,
+            'employerSizes': company_size_dict.get(company_size)
+        }
 
-        url += '&remoteWorkType=1' if remote else ''
+        # Remove None values from params
+        params = {k: v for k, v in params.items() if v is not None}
 
-        url += f'&fromAge={days_ago}' if days_ago and days_ago != 0 else ''
+        query_string = urlencode(params)
+        full_url = urljoin(url, '?' + query_string) if query_string else url
 
-        url += '&applicationType=1' if easy_apply else ''
-
-        url += f'&minRating={min_company_rating}.0' if min_company_rating else ''
-
-        url += f'maxSalary={salary_range[1]}&minSalary={salary_range[0]}' if salary_range else ''
-
-        url += f'&seniorityType={exp_level}' if exp_level else ''
-
-        url += f'&employerSizes={company_size_dict.get(company_size)}' if company_size else ''
-        
-        return url
+        return full_url
+ 
 
 
 
 
 
     def search(self, job_title: str, **kwargs):
+        
         search_url = Glassdoor.create_job_search_url(job_title, **kwargs)
         self.driver.get(search_url)
         return self.driver.page_source
