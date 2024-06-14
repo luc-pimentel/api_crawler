@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 import time
 from ..data_lake.logger import log_io_to_json
+from ..exceptions import *
 import warnings
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -93,6 +94,10 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
         
         search_url = Glassdoor.create_job_search_url(job_title, **kwargs)
         self.driver.get(search_url)
+
+        if any(msg in self.driver.page_source for msg in ["Please check your spelling or try a different job title.", "There are no matches for"]) :
+            raise NoResultsException(f"No results found for {job_title} with the given parameters.")
+
         return self.driver.page_source
 
 
