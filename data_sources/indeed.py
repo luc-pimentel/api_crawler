@@ -3,7 +3,7 @@ from ..data_lake.logger import log_io_to_json
 import warnings
 from bs4 import BeautifulSoup
 import time
-from ..exceptions import CaptchaException
+from ..exceptions import *
 
 
 class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
@@ -86,7 +86,12 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
         url = self.create_job_search_url(search_query, location, start_from, **kwargs)
         self.driver.get(url)
 
-        
+        if any(phrase in self.driver.page_source for phrase in [
+            "Verify you are human by completing the action below",
+            "Verifying you are human. This may take a few seconds.",
+            "needs to review the security of your connection before proceeding."]):
+
+            raise CaptchaException("CAPTCHA encountered while accessing Indeed.")
 
         soup = BeautifulSoup(self.driver.page_source, 'html.parser')
 
@@ -150,9 +155,19 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
             - It handles the structure of the Indeed page as observed at the time of implementation, which may change in the future.
         """
         
-        job_posting_feed = soup.find('div', id='mosaic-jobResults').find('ul')
+
+        search_results = soup.find('div', id='mosaic-jobResults')
+
+        if not search_results:
+            raise NoResultsException("No search results found.")
+
+        job_posting_feed = search_results.find('ul')
 
         job_posts_list = job_posting_feed.find_all('li', recursive=False)
+
+        
+
+
 
         job_postings_data = []
         for job in job_posts_list:

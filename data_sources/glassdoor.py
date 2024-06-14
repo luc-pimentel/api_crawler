@@ -59,7 +59,7 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
         if location:
             ## NOTE: Location filtering on glassdoor URL requires a GEO ID, which is not so straightforward to obtain.
             ## As such, the search will be limited to the United States for now.
-            raise NotImplementedError("Glassdoor API does not support location filtering yet. Job search will be limited to the United States.")
+            raise NotImplementedError("Glassdoor API does not support location filtering yet.")
             #url += location.replace(' ','-')+'-' if location else ''
 
         url += job_title.replace(' ', '-').lower() + "-jobs-SRCH_KO0," + str(len(job_title)) + ".htm"

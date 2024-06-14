@@ -6,3 +6,7 @@ class CaptchaException(Exception):
 
 
 
+class NoResultsException(Exception):
+    def __init__(self, message="No results found for the given search criteria"):
+        self.message = message
+        super().__init__(self.message)
