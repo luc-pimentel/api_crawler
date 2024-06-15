@@ -28,6 +28,7 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
         return yts.VideosSearch(query, limit = results, **kwargs).result()
     
 
+
     @log_io_to_json
     def search_channel(self, query, limit=10, region=None, **kwargs):
         channels_search = yts.ChannelsSearch(query, limit=limit, region=region, **kwargs)
@@ -36,7 +37,7 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
 
 
     @log_io_to_json
-    def get_all_videos_from_channel(self, channel_id: str, n_videos: Union[int,str] = 'all'):
+    def get_videos_from_channel(self, channel_id: str, n_videos: Union[int,str] = 'all'):
 
         if n_videos != 'all' and not isinstance(n_videos, int):
             raise ValueError("n_videos must be 'all' or an integer")
