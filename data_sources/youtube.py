@@ -37,7 +37,8 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
 
     @log_io_to_json
     def get_comments(self, video_id:str, max_results:int = 20, order = 'relevance', text_format = 'plainText', search_terms:str = None, **kwargs):
-        
+        '''Get comments from a given YouTube video. Comment replies not included'''
+
         if order not in ['relevance', 'time']:
             raise ValueError("Order must be either 'relevance' or 'time'")
 
@@ -56,12 +57,40 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
         response = self.get('commentThreads', params = params).json()
         
         return response
-    
+
+
+
+    @log_io_to_json
+    def get_all_comments(self, video_id:str, **kwargs):
+        '''Get all comments from a given YouTube video. Replies not included'''
+        all_comments = []
+        next_page_token = None
+
+        while True:
+            response = self.get_comments(video_id, max_results=100, pageToken=next_page_token, **kwargs)
+            all_comments.extend(response.get('items', []))
+            next_page_token = response.get('nextPageToken')
+            
+            if not next_page_token:
+                break
+
+        return all_comments
     
 
   #  @log_io_to_json
-    def get_all_comments(self, video_id: str):
-        '''Retrieve all comments from a given YouTube video'''
+    def get_comment_replies(self, video_id: str):
+        '''Retrieve replies from a given YouTube comment'''
+        raise NotImplementedError('This method needs to be implemented')
+        comments = yts.Comments(video_id)
+
+        while comments.hasMoreComments:
+            comments.getNextComments()
+            
+        return comments.comments["result"]
+    
+
+    def get_all_comment_replies(self, video_id: str):
+        '''Retrieve all replies from a given YouTube comment'''
         raise NotImplementedError('This method needs to be implemented')
         comments = yts.Comments(video_id)
 
