@@ -2,6 +2,7 @@ from ._base import BaseSearchAPI, BaseRestfulAPI
 from ..data_lake.logger import log_io_to_json
 import youtubesearchpython as yts
 from decouple import config
+from typing import Union
 
 
 YOUTUBE_API_KEY = config('YOUTUBE_API_KEY', None)
@@ -26,6 +27,30 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
         '''Search youtube videos'''
         return yts.VideosSearch(query, limit = results, **kwargs).result()
     
+
+    @log_io_to_json
+    def search_channel(self, query, limit=10, region=None, **kwargs):
+        channels_search = yts.ChannelsSearch(query, limit=limit, region=region, **kwargs)
+        return channels_search.result()
+
+
+
+    @log_io_to_json
+    def get_all_videos_from_channel(self, channel_id: str, n_videos: Union[int,str] = 'all'):
+
+        if n_videos != 'all' and not isinstance(n_videos, int):
+            raise ValueError("n_videos must be 'all' or an integer")
+
+        playlist = yts.Playlist(yts.playlist_from_channel_id(channel_id))
+
+        while playlist.hasMoreVideos:
+            if n_videos != 'all' and len(playlist.videos) >= n_videos:
+                break
+
+            playlist.getNextVideos()
+
+        return playlist.videos[:n_videos] if n_videos != 'all' else playlist.videos
+
 
 
     @log_io_to_json
