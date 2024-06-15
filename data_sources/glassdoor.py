@@ -95,7 +95,18 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
         search_url = Glassdoor.create_job_search_url(job_title, **kwargs)
         self.driver.get(search_url)
 
-        if any(msg in self.driver.page_source for msg in ["Please check your spelling or try a different job title.", "There are no matches for"]) :
+        wait = WebDriverWait(self.driver, 10)
+
+        
+        # If email sign-up pop up appears, close it. If not, continue without action
+        try:
+            close_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.CloseButton')))
+            close_button.click()
+        except:
+            pass
+
+
+        if any(msg in self.driver.page_source for msg in ["had 0 results, but similar jobs can be found below."]) :
             raise NoResultsException(f"No results found for {job_title} with the given parameters.")
 
         return self.driver.page_source
