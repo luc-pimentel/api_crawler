@@ -173,6 +173,22 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
         for job in job_posts_list:
             job_postings_data.append(self._extract_job_data(job))
         return job_postings_data
+    
+
+    def _get_full_job_description(self, url:str):
+
+        self.driver.get(url)
+
+        page_source  = self.driver.page_source
+        soup = BeautifulSoup(page_source, 'html.parser')
+
+        ### TODO: Check for captcha and throw an error if it is detected
+
+        job_description_tab = soup.find('div', id = 'jobDescriptionText')
+
+        full_job_description = job_description_tab.text.strip() if job_description_tab else None
+
+        return full_job_description
 
 
 
@@ -199,7 +215,7 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
             - The function logs input and output data to JSON as part of its operation due to the `log_io_to_json` decorator.
         """
         if get_full_description:
-            raise NotImplementedError('get_full_description is not implemented yet.')
+            warnings.warn('Using the parameter get_full_description = True may trigger captchas or rate limits.')
         
         
         if n_listings > 15:
@@ -220,7 +236,10 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
             
             current_start += 15  # Move to the next page
 
-        
+        if get_full_description:
+            for job in job_postings_data:
+                job['full_description'] = self._get_full_job_description(job['link']) if job.get('link') else None
+
         if close:
             self.close()
 
