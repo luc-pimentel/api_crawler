@@ -4,7 +4,7 @@ import youtubesearchpython as yts
 from decouple import config
 
 
-YOUTUBE_API_KEY = config('YOUTUBE_API_KEY', default = None)
+YOUTUBE_API_KEY = config('YOUTUBE_API_KEY', None)
 
 
 class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
@@ -36,7 +36,7 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
     
 
     @log_io_to_json
-    def get_comments(self, video_id:str, max_results:int = 20, order = 'relevance', text_format = 'plainText', search_terms:str = None, **kwargs):
+    def get_comments(self, video_id:str, max_results:int = 20, include_replies:bool = True, order = 'relevance', text_format = 'plainText', search_terms:str = None, **kwargs):
         '''Get comments from a given YouTube video. Comment replies not included'''
 
         if order not in ['relevance', 'time']:
@@ -45,7 +45,10 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
         if text_format not in ['html', 'plainText']:
             raise ValueError("textFormat must be either 'html' or 'plainText'")
 
-        params = {'videoId': video_id, 'part': 'snippet',
+        part = 'snippet, replies' if include_replies else 'snippet'
+
+
+        params = {'videoId': video_id, 'part': part,
                   'maxResults': max_results, 'order':order,
                   'textFormat':text_format, 'searchTerms':search_terms,
                   **kwargs
@@ -77,17 +80,16 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
         return all_comments
     
 
-  #  @log_io_to_json
-    def get_comment_replies(self, video_id: str):
-        '''Retrieve replies from a given YouTube comment'''
-        raise NotImplementedError('This method needs to be implemented')
-        comments = yts.Comments(video_id)
+    @log_io_to_json
+    def get_comment_replies(self, comment_id:str, max_results:int = 20, **kwargs):
 
-        while comments.hasMoreComments:
-            comments.getNextComments()
-            
-        return comments.comments["result"]
-    
+        params = {'parentId': comment_id, 'part': 'snippet',
+                  'maxResults': max_results, **kwargs}
+
+        comments_response = self.get('comments', params = params)
+        
+        return comments_response.json()
+        
 
     def get_all_comment_replies(self, video_id: str):
         '''Retrieve all replies from a given YouTube comment'''
