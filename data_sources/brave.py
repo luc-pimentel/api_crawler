@@ -2,22 +2,27 @@ import json
 from ._base import BaseSearchAPI
 from decouple import config
 from ..data_lake.logger import log_io_to_json
-
+from ..exceptions import NoAPIKeyException
+import os
 
 BRAVE_API_KEY = config('BRAVE_API_KEY', default=None)
 
 
 
 class BraveSearchAPI(BaseSearchAPI):
-    def __init__(self):
+    def __init__(self, api_key):
         from langchain.tools import BraveSearch
         
         self.search_engine = BraveSearch
 
-        if BRAVE_API_KEY is None:
-            raise ValueError("BRAVE_API_KEY not found in the .env file. Please add it to proceed.")
+        if api_key is None:
+            api_key = os.environ.get("BRAVE_API_KEY")
         
-        self.api_key = BRAVE_API_KEY
+        if api_key is None:
+            raise NoAPIKeyException("BRAVE API key provided. Please set the BRAVE_API_KEY environment variable using os.environ['BRAVE_API_KEY'] or pass it to the object via the api_key parameter.")
+
+        
+        self.api_key = api_key
 
 
     @log_io_to_json

@@ -21,7 +21,7 @@ class BaseSerpAPI(BaseRestfulAPI):
             self.api_key = os.environ.get("SERP_API_KEY")
         
         if self.api_key is None:
-            raise NoAPIKeyException("SERP API key provided. Some methods may not work.\nPlease set the SERP_API_KEY environment variable using os.environ['SERP_API_KEY'] or pass it to the object via the api_key parameter.")
+            raise NoAPIKeyException("SERP API key provided. Please set the SERP_API_KEY environment variable using os.environ['SERP_API_KEY'] or pass it to the object via the api_key parameter.")
 
 
         self.params = {

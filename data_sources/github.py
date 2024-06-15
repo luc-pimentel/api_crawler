@@ -3,19 +3,25 @@ from decouple import config
 from datetime import datetime, timedelta
 from ..data_lake.logger import log_io_to_json
 from ._base import BaseSearchAPI, BaseRestfulAPI
-
+import os
+from ..exceptions import NoAPIKeyException
 
 GITHUB_API_KEY = config('GITHUB_API_KEY', default=None)
 
 
 class GithubAPI(BaseRestfulAPI, BaseSearchAPI):
-    def __init__(self):
+    def __init__(self, api_key: str = GITHUB_API_KEY):
         super().__init__()
 
-        if GITHUB_API_KEY is None:
-            raise ValueError("GITHUB_API_KEY not found in the .env file. Please add it to proceed.")
+        if api_key is None:
+            api_key = os.environ.get("GITHUB_API_KEY")
+        
+        if api_key is None:
+            raise NoAPIKeyException("GITHUB API key provided. Please set the GITHUB_API_KEY environment variable using os.environ['GITHUB_API_KEY'] or pass it to the object via the api_key parameter.")
 
-        self.api_key = GITHUB_API_KEY
+    
+
+        self.api_key = api_key
         self.base_url = 'https://api.github.com/'
         self.headers = {
             "Accept": "application/vnd.github+json",

@@ -5,16 +5,21 @@ from apify_client import ApifyClient
 from ..exceptions import NoAPIKeyException
 import os
 
+
 APIFY_API_KEY = config("APIFY_API_KEY", default=None)
 
 
 class ApifyAPI(BaseAPI):
-    def __init__(self):
+    def __init__(self, api_key: str = APIFY_API_KEY):
 
-        if APIFY_API_KEY is None:
-            raise ValueError("APIFY_API_KEY not found in the .env file. Please add it to proceed.")
+        if api_key is None:
+            api_key = os.environ.get("APIFY_API_KEY")
+        
+        if api_key is None:
+            raise NoAPIKeyException("APIFY API key provided. Please set the APIFY_API_KEY environment variable using os.environ['APIFY_API_KEY'] or pass it to the object via the api_key parameter.")
 
-        self.client = ApifyClient(APIFY_API_KEY)
+        self.api_key = api_key
+        self.client = ApifyClient(api_key)
 
     def get_actors(self):
         return self.client.actors().list().items

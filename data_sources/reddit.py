@@ -3,6 +3,9 @@ import requests
 from decouple import config
 from ._base import BaseAPI
 from ..data_lake.logger import log_io_to_json
+from ..exceptions import NoAPIKeyException
+import os
+
 
 REDDIT_CLIENT_ID = config('REDDIT_CLIENT_ID', default=None)
 REDDIT_CLIENT_SECRET = config('REDDIT_CLIENT_SECRET', default=None)
@@ -11,21 +14,31 @@ REDDIT_USER_AGENT = config('REDDIT_USER_AGENT', default=None)
 
 
 class RedditAPI(BaseAPI):
-    def __init__(self):
+    def __init__(self, reddit_client_id: str = REDDIT_CLIENT_ID, reddit_client_secret: str = REDDIT_CLIENT_SECRET, reddit_user_agent: str = REDDIT_USER_AGENT):
+
+        reddit_client_id = os.environ.get("REDDIT_CLIENT_ID") if not reddit_client_id else reddit_client_id
+
+        reddit_client_secret = os.environ.get("REDDIT_CLIENT_SECRET") if not reddit_client_secret else reddit_client_secret
+        
+        reddit_user_agent = os.environ.get("REDDIT_USER_AGENT") if not reddit_user_agent else reddit_user_agent
+
 
         missing_vars = [var for var, value in {
-            'REDDIT_CLIENT_ID': REDDIT_CLIENT_ID,
-            'REDDIT_CLIENT_SECRET': REDDIT_CLIENT_SECRET,
-            'REDDIT_USER_AGENT': REDDIT_USER_AGENT
+            'REDDIT_CLIENT_ID': reddit_client_id,
+            'REDDIT_CLIENT_SECRET': reddit_client_secret,
+            'REDDIT_USER_AGENT': reddit_user_agent
         }.items() if value is None]
-
-        if missing_vars:
-            raise ValueError(f"Missing environment variables: {', '.join(missing_vars)}. Please add them to proceed.")
-    
         
-        self.client = praw.Reddit(client_id=REDDIT_CLIENT_ID,
-                                  client_secret=REDDIT_CLIENT_SECRET,
-                                  user_agent=REDDIT_USER_AGENT)
+        
+        if missing_vars:
+            raise NoAPIKeyException(f"""Missing environment variables: {', '.join(missing_vars)}. Please add them to proceed.
+                                    Please set the {', '.join(missing_vars)} environment variables using os.environ or pass them to the object via the parameters.""")
+
+
+        
+        self.client = praw.Reddit(client_id=reddit_client_id,
+                                  client_secret=reddit_client_secret,
+                                  user_agent=reddit_user_agent)
         
 
     @log_io_to_json
