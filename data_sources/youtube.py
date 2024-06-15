@@ -1,12 +1,21 @@
-from ._base import BaseSearchAPI
+from ._base import BaseSearchAPI, BaseRestfulAPI
 from ..data_lake.logger import log_io_to_json
 import youtubesearchpython as yts
 
 
 
-class YoutubeAPI(BaseSearchAPI):
-    def __init__(self):
-        pass
+class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
+    base_url: str = 'https://www.googleapis.com/youtube/v3/'
+    api_key: str = 'AIzaSyCtFTa7ET6_JnO5TDMGX3XcBw-IdTJhbzU'
+
+
+
+    def get(self, endpoint, params=None, **kwargs):
+        if params is None:
+            params = {}
+        params['key'] = self.api_key
+        return super().get(endpoint, params=params, **kwargs)
+
         
 
     @log_io_to_json
@@ -23,16 +32,27 @@ class YoutubeAPI(BaseSearchAPI):
         
     
 
-    #@log_io_to_json
-    def get_comments(self, video_id:str):
-        '''Get video comments (only the first 20 based on the python class)'''
-        raise NotImplementedError('This method needs to be implemented')
-        comments_response = yts.Comments.get(video_id)
+    @log_io_to_json
+    def get_comments(self, video_id:str, max_results:int = 20, order = 'relevance', text_format = 'plainText', search_terms:str = None, **kwargs):
+        
+        if order not in ['relevance', 'time']:
+            raise ValueError("Order must be either 'relevance' or 'time'")
 
-        #comments = [{'video':video_id, 'content':comment['content'],'votes':comment['votes']['simpleText'],
-         #            'published':comment['published']} for comment in comments_response['result']]
+        if text_format not in ['html', 'plainText']:
+            raise ValueError("textFormat must be either 'html' or 'plainText'")
 
-        return comments_response
+        params = {'videoId': video_id, 'part': 'snippet',
+                  'maxResults': max_results, 'order':order,
+                  'textFormat':text_format, 'searchTerms':search_terms,
+                  **kwargs
+                  }
+
+        # Remove None values
+        params = {k: v for k, v in params.items() if v is not None}
+
+        response = self.get('commentThreads', params = params).json()
+        
+        return response
     
     
 

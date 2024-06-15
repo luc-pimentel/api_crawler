@@ -14,10 +14,6 @@ class BaseAPI(ABC):
     It enforces the implementation of the __init__ method in subclasses.
     """
 
-    @abstractmethod
-    def __init__():
-        '''Initialize the API'''
-
 
 
 
