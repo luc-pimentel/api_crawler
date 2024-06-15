@@ -1,12 +1,15 @@
 from ._base import BaseSearchAPI, BaseRestfulAPI
 from ..data_lake.logger import log_io_to_json
 import youtubesearchpython as yts
+from decouple import config
 
+
+YOUTUBE_API_KEY = config('YOUTUBE_API_KEY', default = None)
 
 
 class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
     base_url: str = 'https://www.googleapis.com/youtube/v3/'
-    api_key: str = 'AIzaSyCtFTa7ET6_JnO5TDMGX3XcBw-IdTJhbzU'
+    api_key: str = YOUTUBE_API_KEY
 
 
 
