@@ -27,6 +27,7 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
         return yts.VideosSearch(query, limit = results, **kwargs).result()
     
 
+
     @log_io_to_json
     def get_transcript(self, video_id: str) -> str:
         '''Get video transcript'''
@@ -91,12 +92,21 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
         return comments_response.json()
         
 
-    def get_all_comment_replies(self, video_id: str):
+    @log_io_to_json
+    def get_all_comment_replies(self, comment_id: str, **kwargs):
         '''Retrieve all replies from a given YouTube comment'''
-        raise NotImplementedError('This method needs to be implemented')
-        comments = yts.Comments(video_id)
+ 
+        all_comments = []
+        next_page_token = None
 
-        while comments.hasMoreComments:
-            comments.getNextComments()
-            
-        return comments.comments["result"]
+        while True:
+            response = self.get_comment_replies(comment_id, max_results=100,
+                                    pageToken=next_page_token, **kwargs)
+        
+            all_comments.extend(response.get('items', []))
+            next_page_token = response.get('nextPageToken')
+        
+            if not next_page_token:
+                break
+                
+        return all_comments
