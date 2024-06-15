@@ -2,7 +2,8 @@ import time
 from decouple import config
 from ._base import BaseAPI
 from apify_client import ApifyClient
-
+from ..exceptions import NoAPIKeyException
+import os
 
 APIFY_API_KEY = config("APIFY_API_KEY", default=None)
 

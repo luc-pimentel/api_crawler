@@ -1,8 +1,12 @@
 from ._base import BaseSearchAPI, BaseRestfulAPI
 from ..data_lake.logger import log_io_to_json
 import youtubesearchpython as yts
+from ..exceptions import NoAPIKeyException
 from decouple import config
 from typing import Union
+import os
+import warnings
+
 
 
 YOUTUBE_API_KEY = config('YOUTUBE_API_KEY', None)
@@ -10,10 +14,18 @@ YOUTUBE_API_KEY = config('YOUTUBE_API_KEY', None)
 
 class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
     base_url: str = 'https://www.googleapis.com/youtube/v3/'
-    api_key: str = YOUTUBE_API_KEY
 
 
+    def __init__(self, api_key: str = YOUTUBE_API_KEY):
+        self.api_key = api_key
 
+        if self.api_key is None:
+            self.api_key = os.environ.get("YOUTUBE_API_KEY")
+        
+        if self.api_key is None:
+            warnings.warn("No Youtube V3 API key provided. Some methods may not work.\nPlease set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_API_KEY'] or pass it to the object via the api_key parameter.")
+            
+        
     def get(self, endpoint, params=None, **kwargs):
         if params is None:
             params = {}

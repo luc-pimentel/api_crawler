@@ -15,9 +15,6 @@ class BaseAPI(ABC):
     """
 
 
-
-
-
 class BaseSearchAPI(BaseAPI):
     """
     Abstract base class for search engine API classes.
