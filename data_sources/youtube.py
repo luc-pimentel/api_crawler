@@ -25,7 +25,12 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
         if self.api_key is None:
             warnings.warn("No Youtube V3 API key provided. Some methods may not work.\nPlease set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_API_KEY'] or pass it to the object via the api_key parameter.")
             
-        
+    
+    def _check_api_key(self):
+        if self.api_key is None:
+            raise NoAPIKeyException("An API key is necessary for this method. Please visit the YouTube Data API v3 to obtain one: https://developers.google.com/youtube/v3/")
+
+
     def get(self, endpoint, params=None, **kwargs):
         if params is None:
             params = {}
@@ -77,6 +82,7 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
     @log_io_to_json
     def get_comments(self, video_id:str, max_results:int = 20, include_replies:bool = True, order = 'relevance', text_format = 'plainText', search_terms:str = None, **kwargs):
         '''Get comments from a given YouTube video. Comment replies not included'''
+        self._check_api_key()
 
         if order not in ['relevance', 'time']:
             raise ValueError("Order must be either 'relevance' or 'time'")
@@ -105,6 +111,8 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
     @log_io_to_json
     def get_all_comments(self, video_id:str, **kwargs):
         '''Get all comments from a given YouTube video. Replies not included'''
+        self._check_api_key()
+
         all_comments = []
         next_page_token = None
 
@@ -121,6 +129,7 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
 
     @log_io_to_json
     def get_comment_replies(self, comment_id:str, max_results:int = 20, **kwargs):
+        self._check_api_key()
 
         params = {'parentId': comment_id, 'part': 'snippet',
                   'maxResults': max_results, **kwargs}
@@ -133,7 +142,8 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
     @log_io_to_json
     def get_all_comment_replies(self, comment_id: str, **kwargs):
         '''Retrieve all replies from a given YouTube comment'''
- 
+        self._check_api_key()
+
         all_comments = []
         next_page_token = None
 
