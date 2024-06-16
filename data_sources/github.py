@@ -13,7 +13,9 @@ class GithubAPI(BaseRestfulAPI, BaseSearchAPI):
     def __init__(self, api_key: str = GITHUB_API_KEY):
         super().__init__()
 
-        api_key = self._get_api_key(api_key, "GITHUB_API_KEY")
+        api_key = self._get_api_key(api_key, "GITHUB_API_KEY",
+                                    message = """No API key found for Github API. Please set the GITHUB_API_KEY environment variable.
+See how to get you API key by following this link: https://docs.github.com/en/rest/quickstart?apiVersion=2022-11-28&tool=curl""")
     
         self.api_key = api_key
         self.base_url = 'https://api.github.com/'
