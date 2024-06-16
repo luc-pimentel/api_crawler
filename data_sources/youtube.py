@@ -14,21 +14,22 @@ YOUTUBE_API_KEY = config('YOUTUBE_API_KEY', None)
 
 class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
     base_url: str = 'https://www.googleapis.com/youtube/v3/'
-
+    api_error_message: str = "An API key is necessary for this method. Please visit the YouTube Data API v3 to obtain one: https://developers.google.com/youtube/v3/"
 
     def __init__(self, api_key: str = YOUTUBE_API_KEY):
-        self.api_key = api_key
 
-        if self.api_key is None:
-            self.api_key = os.environ.get("YOUTUBE_API_KEY")
+        api_key = self._get_api_key(api_key, "YOUTUBE_API_KEY",
+                                    action='warn',
+                                    message="""No Youtube V3 API key provided. Some methods may not work.
+Please set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_API_KEY'] or pass it to the object via the api_key parameter.""")
         
-        if self.api_key is None:
-            warnings.warn("No Youtube V3 API key provided. Some methods may not work.\nPlease set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_API_KEY'] or pass it to the object via the api_key parameter.")
-            
+        self.api_key = api_key
+        super().__init__()
+        
     
     def _check_api_key(self):
         if self.api_key is None:
-            raise NoAPIKeyException("An API key is necessary for this method. Please visit the YouTube Data API v3 to obtain one: https://developers.google.com/youtube/v3/")
+            raise NoAPIKeyException(self.api_error_message)
 
 
     def get(self, endpoint, params=None, **kwargs):
@@ -112,6 +113,7 @@ class YoutubeAPI(BaseRestfulAPI, BaseSearchAPI):
     def get_all_comments(self, video_id:str, **kwargs):
         '''Get all comments from a given YouTube video. Replies not included'''
         self._check_api_key()
+        
 
         all_comments = []
         next_page_token = None

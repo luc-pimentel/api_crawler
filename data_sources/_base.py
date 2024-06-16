@@ -7,12 +7,32 @@ from selenium.common.exceptions import NoSuchElementException
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
+from ..exceptions import NoAPIKeyException
+import os
+import warnings
+
+
 
 class BaseAPI(ABC):
     """
     Abstract base class for other API classes.
     It enforces the implementation of the __init__ method in subclasses.
     """
+
+    def _get_api_key(self, api_key: str, env_var: str, action: str = 'raise', message: str = None) -> str:
+
+        if action not in ['raise', 'warn']:
+            raise ValueError("Invalid action. Only 'raise' or 'warn' are allowed.")
+
+
+        if api_key is None:
+            api_key = os.environ.get(env_var)
+        if api_key is None:
+            if action == 'raise':
+                raise NoAPIKeyException(message or f"{env_var} not provided. Please set the {env_var} environment variable or pass it to the object via the api_key parameter.")
+            elif action == 'warn':
+                warnings.warn(message or f"{env_var} not provided. Please set the {env_var} environment variable or pass it to the object via the api_key parameter.")
+        return api_key
 
 
 class BaseSearchAPI(BaseAPI):
