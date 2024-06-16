@@ -182,7 +182,7 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
         job_listings = []
 
         while len(job_listings) < n_listings:
-            job_listings = self._get_job_listings_from_search_results()
+            job_listings.extend(self._get_job_listings_from_search_results())
             if len(job_listings) < n_listings:
                 try:
                     self._next_page()
@@ -193,7 +193,7 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
 
         
 
-        for job in job_listings:
+        for job in job_listings[:n_listings]:
             company_name = job.find('span', class_=lambda x: x and x.startswith('EmployerProfile_compactEmployerName'))
             job_title = job.find('a', {'data-test': 'job-title'})
             location = job.find('div', {'data-test': 'emp-location'})
@@ -203,7 +203,7 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
             link = job.find('a', {'data-test': 'job-title'})
 
             elements = {
-                'company_name': company_name,
+                'company': company_name,
                 'title': job_title,
                 'location': location,
                 'salary': salary,
