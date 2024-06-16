@@ -10,5 +10,5 @@ from .youtube import YoutubeAPI
 from .linked_in import LinkedInAPI
 from .indeed import IndeedAPI
 from .salary import SalaryAPI
-
+from .news import GoogleNewsAPI
 

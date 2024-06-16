@@ -1,4 +1,4 @@
-from .data_sources import (ApifyAPI, BraveSearchAPI, GithubAPI, Glassdoor, RedditAPI, SalaryAPI,
+from .data_sources import (ApifyAPI, BraveSearchAPI, GithubAPI, Glassdoor, RedditAPI, SalaryAPI, GoogleNewsAPI,
                            NewsAPI, YoutubeAPI, GoogleTrends, GoogleJobs, TrendingNow, LinkedInAPI, IndeedAPI)
 
 
@@ -18,6 +18,7 @@ __all__ = [
     "TrendingNow",
     "LinkedInAPI",
     "IndeedAPI",
-    "SalaryAPI"
+    "SalaryAPI",
+    "GoogleNewsAPI"
 ]
 
