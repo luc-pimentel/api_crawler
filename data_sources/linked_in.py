@@ -14,7 +14,8 @@ class LinkedInAPI(BaseRestfulAPI):
         super().__init__()
         
     @staticmethod
-    def create_job_search_params(search_query: str, location: str = 'United States', start: int = 0, days_ago: int = None, job_type: str = None, work_type: str = None, exp_level: str = None, min_salary = None, **kwargs):
+    def create_job_search_params(search_query: str, location: str = 'United States', start: int = 0, days_ago: int = None, job_type: str = None,
+                                 work_type: str = None, exp_level: str = None, min_salary = None, **kwargs):
         
         work_type_dict = {
             'on_site': 1,
