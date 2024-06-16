@@ -14,15 +14,9 @@ class BaseSerpAPI(BaseRestfulAPI):
     def __init__(self, engine: str, api_key: str = SERP_API_KEY):
         super().__init__()
 
+        api_key = self._get_api_key(api_key, "SERP_API_KEY")
 
         self.api_key = api_key
-
-        if self.api_key is None:
-            self.api_key = os.environ.get("SERP_API_KEY")
-        
-        if self.api_key is None:
-            raise NoAPIKeyException("SERP API key provided. Please set the SERP_API_KEY environment variable using os.environ['SERP_API_KEY'] or pass it to the object via the api_key parameter.")
-
 
         self.params = {
             "api_key": self.api_key,

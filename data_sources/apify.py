@@ -12,11 +12,7 @@ APIFY_API_KEY = config("APIFY_API_KEY", default=None)
 class ApifyAPI(BaseAPI):
     def __init__(self, api_key: str = APIFY_API_KEY):
 
-        if api_key is None:
-            api_key = os.environ.get("APIFY_API_KEY")
-        
-        if api_key is None:
-            raise NoAPIKeyException("APIFY API key provided. Please set the APIFY_API_KEY environment variable using os.environ['APIFY_API_KEY'] or pass it to the object via the api_key parameter.")
+        api_key = self._get_api_key(api_key, "APIFY_API_KEY")
 
         self.api_key = api_key
         self.client = ApifyClient(api_key)

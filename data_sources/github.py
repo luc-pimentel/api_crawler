@@ -13,14 +13,8 @@ class GithubAPI(BaseRestfulAPI, BaseSearchAPI):
     def __init__(self, api_key: str = GITHUB_API_KEY):
         super().__init__()
 
-        if api_key is None:
-            api_key = os.environ.get("GITHUB_API_KEY")
-        
-        if api_key is None:
-            raise NoAPIKeyException("GITHUB API key provided. Please set the GITHUB_API_KEY environment variable using os.environ['GITHUB_API_KEY'] or pass it to the object via the api_key parameter.")
-
+        api_key = self._get_api_key(api_key, "GITHUB_API_KEY")
     
-
         self.api_key = api_key
         self.base_url = 'https://api.github.com/'
         self.headers = {

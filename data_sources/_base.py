@@ -19,8 +19,27 @@ class BaseAPI(ABC):
     It enforces the implementation of the __init__ method in subclasses.
     """
 
-    def _get_api_key(self, api_key: str, env_var: str, action: str = 'raise', message: str = None) -> str:
 
+
+    @staticmethod
+    def _get_api_key(api_key: str, env_var: str, action: str = 'raise', message: str = None) -> str:
+        """
+        Util method to retrieve and validate the API key.
+
+        This method attempts to retrieve the API key from the provided parameter.
+        If the parameter is None, it tries to fetch the key from the environment variable.
+        If the key is still None, it raises a NoAPIKeyException.
+
+        Args:
+            api_key (str): The API key provided as a parameter.
+            env_var (str): The name of the environment variable to fetch the API key from.
+
+        Returns:
+            str: The validated API key.
+
+        Raises:
+            NoAPIKeyException: If the API key is not provided and not found in the environment variables.
+        """
         if action not in ['raise', 'warn']:
             raise ValueError("Invalid action. Only 'raise' or 'warn' are allowed.")
 
@@ -33,6 +52,10 @@ class BaseAPI(ABC):
             elif action == 'warn':
                 warnings.warn(message or f"{env_var} not provided. Please set the {env_var} environment variable or pass it to the object via the api_key parameter.")
         return api_key
+
+
+
+
 
 
 class BaseSearchAPI(BaseAPI):
