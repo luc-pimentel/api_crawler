@@ -66,7 +66,7 @@ class TrendingNow(BaseSerpAPI):
 
 class GoogleJobs(BaseSerpAPI):
     def __init__(self):
-        super().__init__(f'google_jobs')
+        super().__init__('google_jobs')
 
     
     def get(self, search_query:str, **kwargs):
