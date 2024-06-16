@@ -25,6 +25,8 @@ def serialize_data(data):
         return str(data)
 
 
+
+
 def log_io_to_json(func):
     """
     Decorator that logs the input and output of a function to a JSON file.
