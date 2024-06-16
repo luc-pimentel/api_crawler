@@ -127,9 +127,9 @@ class IndeedAPI(BaseSeleniumAPI, BaseSearchAPI):
         link = job.find('a')
 
         job_dict = {
-            'job_title': job_title.text if job_title else None,
-            'company_name': company_name.text if company_name else None,
-            'job_location': job_location.text if job_location else None,
+            'title': job_title.text if job_title else None,
+            'company': company_name.text if company_name else None,
+            'location': job_location.text if job_location else None,
             'snippet': snippet.text if snippet else None,
             'date': date.text if date else None,
             'link': f"{self.base_url}{link['href']}" if link else None
