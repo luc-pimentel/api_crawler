@@ -15,7 +15,8 @@ class BraveSearchAPI(BaseSearchAPI):
         
         self.search_engine = BraveSearch
 
-        api_key = self._get_api_key(api_key, "BRAVE_API_KEY")
+        api_key = self._get_api_key(api_key, "BRAVE_API_KEY", message ="""Please set the BRAVE_API_KEY environment variable or pass it to the object via the api_key parameter.
+You can get your API key here https://brave.com/search/api/""")
         
         self.api_key = api_key
 
