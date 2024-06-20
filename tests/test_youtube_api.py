@@ -51,7 +51,7 @@ def test_youtube_get_videos_from_channel(youtube):
 
 def test_youtube_get_transcript(youtube):
     video_id = 'GIRkQQHzsxI'
-    response = youtube.get_transcript(video_id)
+    response = youtube.get_transcript(video_id, timestamps=True)
     
     # Check if 'segments' key is in the response
     assert 'segments' in response, "'segments' key not found in the response"

@@ -73,10 +73,14 @@ Please set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_AP
 
 
     @log_io_to_json
-    def get_transcript(self, video_id: str) -> str:
+    def get_transcript(self, video_id: str, timestamps: bool = False) -> str:
         '''Get video transcript'''
-        return yts.Transcript.get(video_id)
+        transcript = yts.Transcript.get(video_id)
         
+        if not timestamps:
+            return ' '.join([segment['text'] for segment in transcript['segments']])
+        else:
+            return transcript
         
     
 

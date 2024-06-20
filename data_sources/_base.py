@@ -50,7 +50,7 @@ class BaseAPI(ABC):
             if action == 'raise':
                 raise NoAPIKeyException(message or f"{env_var} not provided. Please set the {env_var} environment variable or pass it to the object via the api_key parameter.")
             elif action == 'warn':
-                warnings.warn(message or f"{env_var} not provided. Please set the {env_var} environment variable or pass it to the object via the api_key parameter.")
+                warnings.warn(message or f"{env_var} not provided. Please set the {env_var} environment variable or pass it to the object via the api_key parameter.", category=NoAPIKeyException)
         return api_key
 
 
