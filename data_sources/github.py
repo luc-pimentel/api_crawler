@@ -45,17 +45,28 @@ See how to get you API key by following this link: https://docs.github.com/en/re
 
 
     @log_io_to_json
-    def get_repo_issues(self, repo_name:str, params = None, **kwargs):
-        return self._get_repos(repo_name, 'issues', params = params, **kwargs)
+    def get_repo_issues(self, repo_name:str, params = None, comments = False, **kwargs):
+        if not comments:
+            return self._get_repos(repo_name, 'issues', params = params, **kwargs).json()
+        else:
+            issues = self._get_repos(repo_name, 'issues', params = params, **kwargs).json()
+
+            for issue in issues:
+                issue['comments_thread'] = self._get_repos(repo_name, f'issues/{issue["number"]}/comments').json()
+            return issues
     
 
     @log_io_to_json
-    def get_all_repo_issues(self, repo):
+    def get_all_repo_issues(self, repo, params = None, **kwargs):
+
+        if params is None:
+            params = {}
+
         all_issues = []
         page = 1
         while True:
-            params = {'per_page': 100, 'page': page}
-            issues = self.get_repo_issues(repo, params=params).json()
+            params = {'per_page': 100, 'page': page, **params}
+            issues = self.get_repo_issues(repo, params=params, **kwargs).json()
             if len(issues) == 0:
                 break
             all_issues.extend(issues)
@@ -70,12 +81,15 @@ See how to get you API key by following this link: https://docs.github.com/en/re
     
     
     @log_io_to_json
-    def get_all_repo_pull_requests(self, repo):
+    def get_all_repo_pull_requests(self, repo, params = None, **kwargs):
+        if params is None:
+            params = {}
+
         all_pulls = []
         page = 1
         while True:
-            params = {'per_page': 100, 'page': page}
-            pulls = self.get_repo_pulls(repo, params=params).json()
+            params = {'per_page': 100, 'page': page, **params}
+            pulls = self.get_repo_pulls(repo, params=params, **kwargs).json()
             if len(pulls) == 0:
                 break
             all_pulls.extend(pulls)
@@ -88,12 +102,15 @@ See how to get you API key by following this link: https://docs.github.com/en/re
         return self._get_repos(repo_name, 'commits', **kwargs)
     
     @log_io_to_json
-    def get_all_repo_commits(self, repo):
+    def get_all_repo_commits(self, repo, params = None, **kwargs):
+        if params is None:
+            params = {}
+
         all_commits = []
         page = 1
         while True:
-            params = {'per_page': 100, 'page': page}
-            commits = self.get_repo_commits(repo, params=params).json()
+            params = {'per_page': 100, 'page': page, **params}
+            commits = self.get_repo_commits(repo, params=params, **kwargs).json()
             if len(commits) == 0:
                 break
             all_commits.extend(commits)
@@ -106,12 +123,15 @@ See how to get you API key by following this link: https://docs.github.com/en/re
         return self._get_repos(repo_name, 'comments', **kwargs)
 
     @log_io_to_json
-    def get_all_repo_comments(self, repo):
+    def get_all_repo_comments(self, repo, params = None, **kwargs):
+        if params is None:
+            params = {}
+
         all_comments = []
         page = 1
         while True:
-            params = {'per_page': 100, 'page': page}
-            comments = self.get_repo_comments(repo, params=params).json()
+            params = {'per_page': 100, 'page': page, **params}
+            comments = self.get_repo_comments(repo, params=params, **kwargs).json()
             if len(comments) == 0:
                 break
             all_comments.extend(comments)
