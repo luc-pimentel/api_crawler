@@ -68,6 +68,7 @@ See how to get you API key by following this link: https://docs.github.com/en/re
     def get_repo_pulls(self, repo_name: str, **kwargs):
         return self._get_repos(repo_name, 'pulls', **kwargs)
     
+    
     @log_io_to_json
     def get_all_repo_pull_requests(self, repo):
         all_pulls = []
