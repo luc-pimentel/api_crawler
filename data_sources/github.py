@@ -30,8 +30,94 @@ See how to get you API key by following this link: https://docs.github.com/en/re
         kwargs['headers'] = self.headers
 
         return super().get(endpoint, **kwargs)
+    
+
+
+    def _get_repos(self, repo_name:str, endpoint:str, **kwargs):
+
+        if '/' not in repo_name or len(repo_name.split('/')) != 2:
+            raise ValueError(f"repo_name must be in '{{owner}}/{{repo}}' format. Got {repo_name}")
+
+
+        repo_endpoint = f'repos/{repo_name}/{endpoint}'
+        return self.get(repo_endpoint, **kwargs)
+    
+
+
+    @log_io_to_json
+    def get_repo_issues(self, repo_name:str, params = None, **kwargs):
+        return self._get_repos(repo_name, 'issues', params = params, **kwargs)
+    
+
+    @log_io_to_json
+    def get_all_repo_issues(self, repo):
+        all_issues = []
+        page = 1
+        while True:
+            params = {'per_page': 100, 'page': page}
+            issues = self.get_repo_issues(repo, params=params).json()
+            if len(issues) == 0:
+                break
+            all_issues.extend(issues)
+            page += 1
+        return all_issues
+
 
     
+    @log_io_to_json
+    def get_repo_pulls(self, repo_name: str, **kwargs):
+        return self._get_repos(repo_name, 'pulls', **kwargs)
+    
+    @log_io_to_json
+    def get_all_repo_pull_requests(self, repo):
+        all_pulls = []
+        page = 1
+        while True:
+            params = {'per_page': 100, 'page': page}
+            pulls = self.get_repo_pulls(repo, params=params).json()
+            if len(pulls) == 0:
+                break
+            all_pulls.extend(pulls)
+            page += 1
+        return all_pulls
+
+
+    @log_io_to_json
+    def get_repo_commits(self, repo_name: str, **kwargs):
+        return self._get_repos(repo_name, 'commits', **kwargs)
+    
+    @log_io_to_json
+    def get_all_repo_commits(self, repo):
+        all_commits = []
+        page = 1
+        while True:
+            params = {'per_page': 100, 'page': page}
+            commits = self.get_repo_commits(repo, params=params).json()
+            if len(commits) == 0:
+                break
+            all_commits.extend(commits)
+            page += 1
+        return all_commits
+        
+
+    @log_io_to_json
+    def get_repo_comments(self, repo_name: str, **kwargs):
+        return self._get_repos(repo_name, 'comments', **kwargs)
+
+    @log_io_to_json
+    def get_all_repo_comments(self, repo):
+        all_comments = []
+        page = 1
+        while True:
+            params = {'per_page': 100, 'page': page}
+            comments = self.get_repo_comments(repo, params=params).json()
+            if len(comments) == 0:
+                break
+            all_comments.extend(comments)
+            page += 1
+        return all_comments
+
+
 
     def search(self, endpoint, query, **kwargs):
         
@@ -43,7 +129,7 @@ See how to get you API key by following this link: https://docs.github.com/en/re
 
         response = self.search('repositories', query, **kwargs)
         return response
-    
+
 
 
     @log_io_to_json
