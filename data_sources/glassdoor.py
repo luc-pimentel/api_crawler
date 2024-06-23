@@ -117,6 +117,8 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
 
 
     def _get_job_posting_full_description(self, url: str):
+        if not url or not isinstance(url, str):
+            return None
 
         self.driver.get(url)
 
@@ -213,7 +215,7 @@ class Glassdoor(BaseSearchAPI, BaseSeleniumAPI):
             }
 
             job_posting_dict = {key: (element.text if element else None) for key, element in elements.items()}
-            job_posting_dict['link'] = link['href'].split('?')[0] if link else None
+            job_posting_dict['link'] = link['href'] if link else None
 
             job_postings_data.append(job_posting_dict)
 

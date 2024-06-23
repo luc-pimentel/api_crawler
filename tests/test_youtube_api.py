@@ -7,6 +7,7 @@ def youtube():
     return YoutubeAPI()
 
 
+
 def test_youtube_search(youtube):
 
     response = youtube.search('Best Python Courses')
@@ -16,7 +17,6 @@ def test_youtube_search(youtube):
         
     # Check if the value of 'result' is a list
     assert isinstance(response['result'], list), "'result' is not a list"
-
 
 
 
@@ -34,7 +34,6 @@ def test_youtube_search_channel(youtube):
 
 
 
-
 def test_youtube_get_videos_from_channel(youtube):
     channel_id = 'UCdu8D9NV9NP1iVPTYlenORw'
     n_videos = 5
@@ -45,7 +44,6 @@ def test_youtube_get_videos_from_channel(youtube):
     
     # Check if the list has a size of 5
     assert len(response) == 5, "List size is not 5"
-
 
 
 
@@ -62,24 +60,35 @@ def test_youtube_get_transcript(youtube):
 
 
 
-def test_youtube_get_comments(youtube):
+@pytest.mark.parametrize("include_metadata", [True, False])
+def test_youtube_get_comments(youtube, include_metadata):
     video_id = 'GIRkQQHzsxI'
-    response = youtube.get_comments(video_id)
+    response = youtube.get_comments(video_id, include_metadata=include_metadata)
     
-    assert isinstance(response, dict), "Response is not a dict"
+    if include_metadata:
+        assert isinstance(response, dict), "Response is not a dict"
+        assert 'items' in response, "'items' key not found in the response"
+        assert isinstance(response['items'], list), "'items' is not a list"
+        assert len(response['items']) > 0, "List size is not greater than 0"
+    else:
+        assert isinstance(response, list), "Response is not a list"
+        assert all(isinstance(item, str) for item in response), "Not all items in the response are strings"
 
-    assert 'items' in response, "'items' key not found in the response"
-    assert isinstance(response['items'], list), "'items' is not a list"
-    assert len(response['items']) > 0, "List size is not greater than 0"
 
 
-
-def test_youtube_get_all_comments(youtube):
+@pytest.mark.parametrize("include_metadata", [True, False])
+def test_youtube_get_all_comments(youtube, include_metadata):
     video_id = 'GIRkQQHzsxI'
-    response = youtube.get_all_comments(video_id)
-    
-    assert isinstance(response, list), "Response is not a list"
-    assert len(response) > 0, "List size is not greater than 0"
+    response = youtube.get_all_comments(video_id, include_metadata=include_metadata)
+
+    if include_metadata:
+        assert isinstance(response, list), "Response is not a list"
+        assert len(response) > 0, "List size is not greater than 0"
+        assert all(isinstance(item, dict) for item in response), "Not all items in the response are dicts"
+    else:
+        assert isinstance(response, list), "Response is not a list"
+        assert len(response) > 0, "List size is not greater than 0"
+        assert all(isinstance(item, str) for item in response), "Not all items in the response are strings"
 
 
 
@@ -91,7 +100,6 @@ def test_youtube_get_comment_replies(youtube):
     assert 'items' in response, "'items' key not found in the response"
     assert isinstance(response['items'], list), "'items' is not a list"
     
-
 
 
 def test_youtube_get_all_comment_replies(youtube):

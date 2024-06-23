@@ -85,7 +85,7 @@ Please set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_AP
     
 
     @log_io_to_json
-    def get_comments(self, video_id:str, max_results:int = 20, include_replies:bool = True, order = 'relevance', text_format = 'plainText', search_terms:str = None, **kwargs):
+    def get_comments(self, video_id:str, max_results:int = 20, include_replies:bool = True, order = 'relevance', text_format = 'plainText', search_terms:str = None, include_metadata:bool = False, **kwargs):
         '''Get comments from a given YouTube video. Comment replies not included'''
         self._check_api_key()
 
@@ -107,14 +107,18 @@ Please set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_AP
         # Remove None values
         params = {k: v for k, v in params.items() if v is not None}
 
-        response = self.get('commentThreads', params = params).json()
-        
+        if include_metadata:
+            response = self.get('commentThreads', params = params).json()
+        else:
+            api_response = self.get('commentThreads', params = params).json()
+            response = [comment.get('snippet',{}).get('topLevelComment',{}).get('snippet',{}).get('textOriginal','') for comment in api_response.get('items',{})]
+     
         return response
 
 
 
     @log_io_to_json
-    def get_all_comments(self, video_id:str, **kwargs):
+    def get_all_comments(self, video_id:str, include_metadata:bool = False, **kwargs):
         '''Get all comments from a given YouTube video. Replies not included'''
         self._check_api_key()
         
@@ -123,14 +127,18 @@ Please set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_AP
         next_page_token = None
 
         while True:
-            response = self.get_comments(video_id, max_results=100, pageToken=next_page_token, **kwargs)
+            ## NOTE: Metadata has to be True when fetching all comments due to the nextPageToken value
+            response = self.get_comments(video_id, max_results=100, pageToken=next_page_token, include_metadata = True, **kwargs)
             all_comments.extend(response.get('items', []))
             next_page_token = response.get('nextPageToken')
             
             if not next_page_token:
                 break
 
-        return all_comments
+        if include_metadata:
+            return all_comments
+        else:
+            return [comment['snippet']['topLevelComment']['snippet']['textDisplay'] for comment in all_comments]
     
 
     @log_io_to_json
