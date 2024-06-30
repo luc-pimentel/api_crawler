@@ -73,7 +73,10 @@ Please set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_AP
             playlist.getNextVideos()
 
         if get_full_info:
-            return [self.get_full_video_info(video['id']) for video in playlist.videos[:n_videos]]
+            if n_videos == 'all':
+                return [self.get_full_video_info(video['id']) for video in playlist.videos]
+            else:
+                return [self.get_full_video_info(video['id']) for video in playlist.videos[:n_videos]]
         
 
         return playlist.videos[:n_videos] if n_videos != 'all' else playlist.videos
@@ -93,7 +96,10 @@ Please set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_AP
     
 
     @log_io_to_json
-    def get_comments(self, video_id:str, max_results:int = 20, include_replies:bool = True, order = 'relevance', text_format = 'plainText', search_terms:str = None, include_metadata:bool = False, **kwargs):
+    def get_comments(self, video_id:str, max_results:int = 20, include_replies:bool = True, order = 'relevance',
+                     text_format = 'plainText', search_terms:str = None, include_metadata:bool = False, **kwargs):
+        
+
         '''Get comments from a given YouTube video. Comment replies not included'''
         self._check_api_key()
 
