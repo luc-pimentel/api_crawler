@@ -38,6 +38,10 @@ Please set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_AP
         params['key'] = self.api_key
         return super().get(endpoint, params=params, **kwargs)
 
+
+    def get_full_video_info(self, video_id):
+        video_info = yts.Video.getInfo(video_id)
+        return video_info
         
 
     @log_io_to_json
@@ -55,7 +59,7 @@ Please set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_AP
 
 
     @log_io_to_json
-    def get_videos_from_channel(self, channel_id: str, n_videos: Union[int,str] = 'all'):
+    def get_videos_from_channel(self, channel_id: str, n_videos: Union[int,str] = 'all', get_full_info:bool = False):
 
         if n_videos != 'all' and not isinstance(n_videos, int):
             raise ValueError("n_videos must be 'all' or an integer")
@@ -67,6 +71,10 @@ Please set the YOUTUBE_API_KEY environment variable using os.environ['YOUTUBE_AP
                 break
 
             playlist.getNextVideos()
+
+        if get_full_info:
+            return [self.get_full_video_info(video['id']) for video in playlist.videos[:n_videos]]
+        
 
         return playlist.videos[:n_videos] if n_videos != 'all' else playlist.videos
 
