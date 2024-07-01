@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "api_crawler"
+version = "0.1.0"
+description = "A library to simplify web scraping and data lake creation"
+readme = "README.md"
+authors = [{ name = "Lucas Pimentel", email = "lucas_cpimentel@proton.me" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["api", "crawler", "web scraping", "data lake"]
+dependencies = [
+    "apify-client",
+    "prawl",
+    "openai",
+    "langchain",
+    "youtube-search-python",
+    "python-decouple",
+    "GoogleNews==1.6.12",
+]
+requires-python = ">=3.7"
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.urls]
+Homepage = "https://github.com/luc-pimentel/api_crawler"
+
+[tool.setuptools]
+packages = ["api_crawler"]
